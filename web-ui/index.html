@@ -1,0 +1,755 @@
+<!doctype html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>Youtube escrow contract - Powered by Ethereum + Oraclize</title>
+  <link rel="icon" type="image/png" href="favicon.png">
+	<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jquery/2.2.0/jquery.min.js"></script>
+	<script type="text/javascript" src="web3.min.js"></script>
+  <link rel="stylesheet" type="text/css" href="https://maxcdn.bootstrapcdn.com/bootswatch/3.3.6/paper/bootstrap.min.css">
+  <script type="text/javascript" src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js"></script>
+  <link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.5.1/animate.min.css">
+  <noscript>
+    <style type="text/css">
+      .active_javascript {
+        display: initial !important;
+        font-size: 1.4em;
+        left: 0;
+        right: 0;
+        position: fixed;
+        z-index: 100000000;
+        background-color: #FFF000;
+        border-bottom: 1px solid #B9B129;
+      }
+    </style>
+  </noscript>
+
+  <style type="text/css">
+  .right {
+    text-align:right;
+  }
+  .left {
+    text-align: left;
+  }
+  .center {
+    text-align: center;
+  }
+  .fright {
+    float: right;
+  }
+  .fleft {
+    float: left;
+  }
+  .show {
+    display: initial !important;
+  }
+  .alert-info {
+    background-color: #949EFF !important;
+    border: 1px solid #6674FF;
+  }
+  .alert-success {
+    border: 1px solid #398A3D;
+  }
+  .b {
+    text-decoration: underline;
+  }
+
+  #bback > a:hover {
+    border-bottom:1px solid #0a6ebd !important;
+  }
+  </style>
+</head>
+<body>
+
+<div style="position: absolute; left: 0; top: 0; padding: 5px 0 0 5px; font-size: 1.05em;" id="bback">
+  <a href="http://dapps.oraclize.it/" style="border-bottom: 1px dotted #2196F3; text-decoration: none;"><span class="glyphicon glyphicon-chevron-left" aria-hidden="true"></span> Ðapps list</a>
+</div>
+
+<div style="position: fixed; top: 0; right: 0; z-index: 10000; padding: 10px; background-color: rgba(0, 0, 0, 0.55); color: #FFF; border: 1px solid #737373; margin: 5px 5px 0 0;display:none;" id="toastm">
+        <button type="button" class="close" aria-label="Close" style="position:absolute;right: 5px; top: 5px;" onclick="$('#toastm').addClass('animated fadeOut');"><span aria-hidden="true">&times;</span></button>
+<div class="center">
+<span style="font-size:1.2em;">HOW IT WORKS</span>
+</div>
+
+Use this smart contract to sponsor youtubers,<br> pay only for the successful ones.<br>
+<div class="center">
+<a href="http://dapps.oraclize.it/youtube-escrow/#0x21c653f72ee09bb2c1246b31520dec7f0b58b7da" class="btn btn-primary btn-sm" style="margin-top:5px;" onclick="window.setTimeout(function(){ location.reload(); },80);">Click here to see an example</a>
+</div>
+</div>
+   <span class="active_javascript center" style="display:none;">Javascript is required, please enable it</span>
+   <div class="container">
+
+<!-- Modal -->
+<div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+        <h4 class="modal-title" id="myModalLabel">Sponsor this video</h4>
+      </div>
+      <div class="modal-body center">
+        Becoming a sponsor for this Youtube video is that easy you just need to deposit any amount to this Ethereum address and then reload the page:
+        <div class="center" style="margin-top:10px;margin-bottom:7px;">
+          <input type="text" value="" id="contriddep" class="form-control" style="width: 400px; display: inline-block; right: 0; left: 0; text-align: center;border-radius: 5px;-moz-border-radius:5px;border: 1px dashed #B5B5B5;background-color: #F5F5F5;" readonly onclick="this.select();"/>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<div class="modal fade" id="depnewcontr" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close" id="dismissnewc"><span aria-hidden="true">&times;</span></button>
+        <h4 class="modal-title" id="myModalLabel">Deploy a new contract</h4>
+      </div>
+      <div class="modal-body" id="newcontractbody">
+        <p>Deploy a new Youtube contract easily, just enter the video ID of your youtube video and set your desired views threshold</p>
+        <div class="form-inline" style="margin-bottom: 50px;">
+          <div class="form-group" style="margin-bottom: 15px;">
+            <label for="videoiddepnewc">Video ID:</label>&nbsp;&nbsp;  
+            <input type="text" class="form-control" id="videoiddepnewc">
+          </div>
+        
+        <div class="form-group">
+        <label for="videoiddepnewc">Views threshold:</label>&nbsp;&nbsp; 
+        <div class="input-group number-spinner">
+        <span class="input-group-btn">
+          <button class="btn btn-default" data-dir="dwn" id="dwn"><span class="glyphicon glyphicon-minus"></span></button>
+        </span>
+        <input type="text" class="form-control text-center" value="100" id="viewsthresholdnewc" style="width: 130px; margin: 0 9px 0px 9px;" >
+        <span class="input-group-btn">
+          <button class="btn btn-default" data-dir="up" id="up"><span class="glyphicon glyphicon-plus"></span></button>
+        </span>
+      </div>
+        </div>
+        </div>
+
+        <div class="center">
+          <span id="newcontractinfo"></span>
+        </div>
+
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-default" data-dismiss="modal" id="closedep">Close</button>
+        <button type="button" class="btn btn-primary" id="submitnewcontract">Deploy</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+      <div class="page-header">
+        <h1>Youtube contract</h1>
+          <div class="fright right">
+      <button type="button" class="btn" data-toggle="collapse" data-target="#collapsedit" id="buttoncollapseid">Advanced mode</button>
+      <div style="margin-top:7px;"></div>
+      <span id="arrowifdisabled"></span>
+      <button type="button" class="btn" data-target="#depnewcontr" id="deploynewc" title="Please connect to your local unlocked node before" data-toggle="modal" disabled>Deploy new contract</button>
+        </div>
+        <p class="lead">Video views-count based escrow<br> </p><span class="text-muted">Powered by <a href="https://www.ethereum.org/" target="_blank">Ethereum</a> + <a href="http://www.oraclize.it" target="_blank">Oraclize</a></span>
+      </div>
+  <div id="collapsedit" class="collapse">
+      <div class="row">
+        <div class="col-md-6">
+        <div class="form-inline">
+          <div class="form-group">
+              <label for="contractid" class="control-label">Please enter the contract ID:</label>
+              <input type="text" class="form-control" id="contractid" style="width:400px;margin: 0 5px 0 5px;">
+              <span class="btn btn-default" id="submitcontractid">SUBMIT</span>
+          </div>
+        </div>
+        </div>
+
+        <div class="col-md-6">
+        <div class="well" style="overflow: auto;">
+        <div class="center" style="margin-bottom:7px;margin-top:-10px;">
+        <div class="btn-group" role="group" aria-label="..." id="btgr" style="display:none;">
+        </div>
+        </div>
+         <div class="form-inline">
+          <div class="form-group">
+              <label for="gethip" class="control-label">Connect to geth:</label>
+              <input type="text" class="form-control" id="gethip" style="width:200px;margin: 0 5px 0 5px;" value="http://178.62.29.206:8081">
+              <!--<input type="text" class="form-control" id="gethip" style="width:200px;margin: 0 5px 0 5px;" value="http://localhost:8545">-->
+              <span class="btn btn-default" id="submitgethip">CONNECT</span>
+          </div>
+        </div>      
+        <div class="fleft" id="connected" style="display:none;">
+          <span class="glyphicon glyphicon-ok" aria-hidden="true"></span> Connected
+        </div>
+        <div class="fleft" id="notconnected" style="display:none;">
+          <span class="glyphicon glyphicon-remove" aria-hidden="true"></span> Error, not connected
+        </div>
+          </div>
+
+        </div>
+        </div>
+      </div>
+      <div style="margin-bottom:4px"></div>
+
+      <div class="alert alert-info" role="alert" id="start" style="display:none;">
+      <span class="glyphicon glyphicon-info-sign" aria-hidden="true"></span>
+      This smart contract is still <u>active</u> and it will be resolved on <span id="expdateinfo" class="b"></span>, if at this time the youtube video will have more than <span id="vthresinfo" class="b"></span> views the funds of the sponsors will be sent to the contract owner otherwhise each sponsors will get <u>25%</u> of their funds back as partial refund.
+      </div>
+
+      <div class="alert alert-success" role="alert" id="end" style="display:none;">
+      <span class="glyphicon glyphicon-ok-sign" aria-hidden="true"></span>
+      This smart contract was <u>resolved</u> on <span id="expdateinfo1" class="b"></span>. At the given date the youtube video had <span id="vviews1" class="b"></span> views, hence the goal of <span id="vthresinfo1" class="b"></span> views <span id="resultcontr" class="b"></span> reached. Given that, <span id="resultsuccess"></span>
+      </div>
+
+      <div class="row" id="initiald">
+      <div class="col-md-12 center">
+      <img src="loading.gif" alt="loading oraclize" id="loadingif" style="display:none;position: absolute;">
+      <img src="youtube-prew.jpg" alt="youtube preview" id="ytpreview">
+      </div>
+      </div>
+
+      <div class="row" id="content" style="display:none;">
+        <div class="col-md-3">
+<!--
+<div class="panel panel-primary">
+  <div class="panel-heading">
+    <h3 class="panel-title">Video ID</h3>
+  </div>
+        <div class="panel panel-default">
+        <div class="panel-body">
+          <span id="vid">Loading...</span>
+          </div>
+        </div>
+</div>
+-->
+<!--
+<div class="panel panel-primary">
+  <div class="panel-heading">
+    <h3 class="panel-title">Current video views</h3>
+  </div>
+        <div class="panel panel-default">
+        <div class="panel-body">
+          <span id="vviews">Loading...</span>
+          </div>
+        </div>
+</div>
+-->
+<div class="panel panel-primary">
+  <div class="panel-heading">
+    <h3 class="panel-title">Contract Owner</h3>
+  </div>
+        <div class="panel panel-default">
+        <div class="panel-body">
+          <span id="vowner">Loading...</span>
+          </div>
+        </div>
+</div>
+<div class="panel panel-primary">
+  <div class="panel-heading">
+    <h3 class="panel-title">Views threshold</h3>
+  </div>
+        <div class="panel panel-default">
+        <div class="panel-body">
+          <span id="vthres">Loading...</span>
+          </div>
+        </div>
+</div>
+<div class="panel panel-primary">
+  <div class="panel-heading">
+    <h3 class="panel-title">Expiry date</h3>
+  </div>
+        <div class="panel panel-default">
+        <div class="panel-body">
+          <span id="vexp">Loading...</span>
+          </div>
+        </div>
+</div>
+        </div>
+
+        <div class="col-md-9" >
+          <span id="youtube_embed" class="center">
+          </span>
+          <div class="fright" id="modalenable" style="display:none;"><button class="btn btn-primary btn-xs" style="text-transform: initial !important;" data-toggle="modal" data-target="#myModal">Want to sponsor this video?</button></div>
+
+<div class="fleft" style="vertical-allign:middle;top:0;bottom:0;text-align:left;">
+<h4>Sponsors list:</h4>
+</div>
+<table class="table table-bordered" id="tab">
+    <thead>
+        <tr id="columntitle">
+            <th>#</th>
+            <th>Address</th>
+            <th>Amount</th>
+        </tr>
+    </thead>
+    <tbody>
+
+    </tbody>
+</table>
+        </div>
+    
+      </div>
+
+
+    </div> <!-- /container -->
+<br>
+<hr>
+<footer class="footer">
+      <div class="container">
+        <p class="text-muted center">Designed by &nbsp;<a href="http://www.oraclize.it" target="_blank"><img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABIAAAAPCAYAAADphp8SAAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAAAyJpVFh0WE1MOmNvbS5hZG9iZS54bXAAAAAAADw/eHBhY2tldCBiZWdpbj0i77u/IiBpZD0iVzVNME1wQ2VoaUh6cmVTek5UY3prYzlkIj8+IDx4OnhtcG1ldGEgeG1sbnM6eD0iYWRvYmU6bnM6bWV0YS8iIHg6eG1wdGs9IkFkb2JlIFhNUCBDb3JlIDUuMy1jMDExIDY2LjE0NTY2MSwgMjAxMi8wMi8wNi0xNDo1NjoyNyAgICAgICAgIj4gPHJkZjpSREYgeG1sbnM6cmRmPSJodHRwOi8vd3d3LnczLm9yZy8xOTk5LzAyLzIyLXJkZi1zeW50YXgtbnMjIj4gPHJkZjpEZXNjcmlwdGlvbiByZGY6YWJvdXQ9IiIgeG1sbnM6eG1wPSJodHRwOi8vbnMuYWRvYmUuY29tL3hhcC8xLjAvIiB4bWxuczp4bXBNTT0iaHR0cDovL25zLmFkb2JlLmNvbS94YXAvMS4wL21tLyIgeG1sbnM6c3RSZWY9Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC9zVHlwZS9SZXNvdXJjZVJlZiMiIHhtcDpDcmVhdG9yVG9vbD0iQWRvYmUgUGhvdG9zaG9wIENTNiAoV2luZG93cykiIHhtcE1NOkluc3RhbmNlSUQ9InhtcC5paWQ6MEU2RUUyQjNDMzRFMTFFNTk3MDRCNTJBQTk2N0M4NUIiIHhtcE1NOkRvY3VtZW50SUQ9InhtcC5kaWQ6MEU2RUUyQjRDMzRFMTFFNTk3MDRCNTJBQTk2N0M4NUIiPiA8eG1wTU06RGVyaXZlZEZyb20gc3RSZWY6aW5zdGFuY2VJRD0ieG1wLmlpZDowRTZFRTJCMUMzNEUxMUU1OTcwNEI1MkFBOTY3Qzg1QiIgc3RSZWY6ZG9jdW1lbnRJRD0ieG1wLmRpZDowRTZFRTJCMkMzNEUxMUU1OTcwNEI1MkFBOTY3Qzg1QiIvPiA8L3JkZjpEZXNjcmlwdGlvbj4gPC9yZGY6UkRGPiA8L3g6eG1wbWV0YT4gPD94cGFja2V0IGVuZD0iciI/PuHu1SIAAAKmSURBVHjadFNLTxNRGD3z7LTFNvQBFTGgEpGHEg3qbzBuSExM2GjizqU/wV/gloSdJq5MXBlZGDcuDBEf0IgmRKDQQAGpfVDotJ0Zz3dpjZJ4mzN3Ovd+5zvf+e7V8P/RQwwSo8QVTdPGDF0fbnlemP+XiJfEHLEqm7V2kCmbiZvEpK7r47HYqaFUKpHI9KTRS5zpyyC/tY3Xc28xMTGG9dwmCoXdA+5/RzwRginbth8PDpy9nOlNa6czvUinkojHY4hEHBi6gYA/0zSxVdhBdyKOO1O3UasdYmu70JX9+v3Wh4UvI6ZhGLPTd6dSI5cukpMhfgDP9+ETzWYLTbRwLF1DsVhCJBzm9yZYKs6fG0AymcCnz9mYyQ9BItGNVqul8N9BEyrVKlVGSKIjCAImC5DL5eG6blFn8FG5UlEZTg56Bcsy1bsorFSqiEaFqLOuIbeRl9dNnY96tXIA/QSRkEigmCpDShZfpDQ6oBK7bgNr6xuynBWimgRo+r9EtmVhMbuMZ89fKK8830O97rK0sDKf3qL4q4TdvZ+yfV50l0ssTbIoK9rKmvTrxvWrGB8dRihkw200xAuEHYf+QBFJWbTG7RDtlcsV6IauFsVwz/M4e2q2bEsRt9ipBpU5JFLdJdnKijqLy8SaEOWFeWb2KRrMKgQ8vfCki5y7olE8uD+tygsCX6mTrknytn9vpBdCtGIaJiavTSBk2zBMQx0+6ZbMEhgJO9jfLypljhNSa6vrOdQOD+XTq87VWJJyhi4MoiedUir+DDkrwbGxYrZ0TsiPjupYXJKKsE0sdO5anPjR39+X7OP1kO4pReaxIkGYKgo7u3g//1FdH0lcYmk8lDOMffj3pb1HPCK6CKsNUSvHwyekM2wtcm1zs8Q3YpFoCMFvAQYAe9MxYsjZmN8AAAAASUVORK5CYII=
+" alt="Oraclize"> Oraclize</a></p>
+      </div>
+    </footer>
+
+<script type="text/javascript">
+
+var node_list = {
+  'Mainnet' : 'http://178.62.29.206:8081/',
+  'Morden' : 'http://178.62.29.206:8082/',
+  'Testnet161' : 'http://178.62.29.206:8083/',  
+};
+
+var abi = [ { "constant": true, "inputs": [], "name": "viewsCount", "outputs": [ { "name": "", "type": "uint256" } ], "type": "function" }, { "constant": false, "inputs": [], "name": "forceCheck", "outputs": [], "type": "function" }, { "constant": false, "inputs": [ { "name": "myid", "type": "bytes32" }, { "name": "result", "type": "string" } ], "name": "__callback", "outputs": [], "type": "function" }, { "constant": true, "inputs": [], "name": "threshold", "outputs": [ { "name": "", "type": "uint256" } ], "type": "function" }, { "constant": true, "inputs": [], "name": "expiryDate", "outputs": [ { "name": "", "type": "uint256" } ], "type": "function" }, { "constant": false, "inputs": [], "name": "sponsorDeposit", "outputs": [], "type": "function" }, { "constant": true, "inputs": [], "name": "owner", "outputs": [ { "name": "", "type": "address" } ], "type": "function" }, { "constant": false, "inputs": [ { "name": "_videoID", "type": "string" }, { "name": "_threshold", "type": "uint256" } ], "name": "setVideoID", "outputs": [], "type": "function" }, { "constant": true, "inputs": [], "name": "videoID", "outputs": [ { "name": "", "type": "string" } ], "type": "function" }, { "constant": true, "inputs": [ { "name": "", "type": "uint256" } ], "name": "sponsorsList", "outputs": [ { "name": "", "type": "address" } ], "type": "function" }, { "constant": true, "inputs": [ { "name": "", "type": "address" } ], "name": "sponsors", "outputs": [ { "name": "", "type": "uint256" } ], "type": "function" }, { "inputs": [], "type": "constructor" } ];
+
+var web3sett = false;
+var gethip = '';
+var contractid = '';
+var hash = '';
+var list = '';
+var web3;
+var ended = false;
+var ownerusername = '';
+var refundsponsors = '';
+var gasamountdeploy = 3000000;
+var gasamountsetvideo = 300000;
+var unlocked_accounts = ''; // []
+var mistob = false;
+
+if(typeof mist !== 'undefined'){
+  
+  mistob = true;
+
+  /* --- REMOVE ATTR NON FUNZIONA (FIX solo per debug!) --- */
+  removeattrdismist();
+  /* --- ------------------------ --- */
+
+  $('#gethip').val('MIST BROWSER');
+  web3 = new Web3(web3.currentProvider);
+  var available_accounts = web3.eth.accounts;
+  //document.write(JSON.stringify(available_accounts));
+  /*
+  $.each(available_accounts,function(index,val){
+      var gastotneeded = gasamountsetvideo+gasamountdeploy;
+      if(web3.eth.getBalance(val).toNumber()>=gastotneeded && val.length==42){
+        unlocked_accounts.push(val);
+      }
+  });
+*/
+  unlocked_accounts = web3.eth.accounts[0];
+  geth_req();
+}
+else {
+  geth_req();
+}
+
+$( document ).ready(function() {
+Object.keys(node_list).forEach(function(i) {
+  list += '#'+i+',';
+
+  $('#btgr').append('<button type="button" class="btn btn-default btn-sm" id="'+i+'">'+i+'</button>');
+});
+
+if(window.location.hash!=''){
+  hash = window.location.hash.substr(1);
+  $('#contractid').val(hash);
+  $('#submitcontractid').click();
+}
+else {
+      $('#toastm').show();
+      $('#toastm').addClass('animated fadeIn');
+      $('#buttoncollapseid').click();
+}
+
+setTimeout(function(){
+$(''+list.slice(0, -1)+'').on('click', function() {
+  $('#gethip').val(node_list[$(this).text()]);
+});
+},500);
+
+});
+
+$('#submitgethip').on('click', function() {
+  geth_req();
+});
+
+$('#submitcontractid').on('click', function(e) {
+  $('#loadingif').css('display','inline-block');
+  e.preventDefault();
+if(web3sett==true){
+  contractid = $('#contractid').val().trim();
+  if(hash!=contractid){
+    window.location.hash = contractid;
+  }
+  var thresh = web3.toDecimal(web3.eth.getStorageAt(contractid, 6));
+  var expiryd = web3.toDecimal(web3.eth.getStorageAt(contractid, 5));
+  var owner = web3.eth.getStorageAt(contractid, 4);
+  var videoid = web3.toAscii(web3.eth.getStorageAt(contractid, 3));
+  var vowner = web3.eth.getStorageAt(contractid, 4).replace('0x000000000000000000000000','');
+  var vviews1 = web3.toDecimal(web3.eth.getStorageAt(contractid, 2));
+  console.log(vowner);
+  if(owner=='0x0000000000000000000000000000000000000000000000000000000000000000'){
+    $('#buttoncollapseid').click();
+    $('#loadingif').css('display','none');
+    alert('Contract ID not found or is not a youtube contract');
+    return;
+  }
+  else if(expiryd==0){
+    setTimeout(function(){
+      $('#submitcontractid').click();
+    }, 20000 );
+    return;
+  }
+
+  var namereg_addr = "0x33990122638b9132ca29c723bdf037f1a891a70c";
+  // TEST
+  //var namereg_addr = "0xb22238d201a1d5813866933eb69b30692e14f9e0";
+  try {
+      var GlobalRegistrar = web3.eth.contract([{"constant":true,"inputs":[{"name":"_owner","type":"address"}],"name":"name","outputs":[{"name":"o_name","type":"bytes32"}],"type":"function"},{"constant":true,"inputs":[{"name":"_name","type":"bytes32"}],"name":"owner","outputs":[{"name":"","type":"address"}],"type":"function"},{"constant":true,"inputs":[{"name":"_name","type":"bytes32"}],"name":"content","outputs":[{"name":"","type":"bytes32"}],"type":"function"},{"constant":true,"inputs":[{"name":"_name","type":"bytes32"}],"name":"addr","outputs":[{"name":"","type":"address"}],"type":"function"},{"constant":false,"inputs":[{"name":"_name","type":"bytes32"}],"name":"reserve","outputs":[],"type":"function"},{"constant":true,"inputs":[{"name":"_name","type":"bytes32"}],"name":"subRegistrar","outputs":[{"name":"o_subRegistrar","type":"address"}],"type":"function"},{"constant":false,"inputs":[{"name":"_name","type":"bytes32"},{"name":"_newOwner","type":"address"}],"name":"transfer","outputs":[],"type":"function"},{"constant":false,"inputs":[{"name":"_name","type":"bytes32"},{"name":"_registrar","type":"address"}],"name":"setSubRegistrar","outputs":[],"type":"function"},{"constant":false,"inputs":[],"name":"Registrar","outputs":[],"type":"function"},{"constant":false,"inputs":[{"name":"_name","type":"bytes32"},{"name":"_a","type":"address"},{"name":"_primary","type":"bool"}],"name":"setAddress","outputs":[],"type":"function"},{"constant":false,"inputs":[{"name":"_name","type":"bytes32"},{"name":"_content","type":"bytes32"}],"name":"setContent","outputs":[],"type":"function"},{"constant":false,"inputs":[{"name":"_name","type":"bytes32"}],"name":"disown","outputs":[],"type":"function"},{"constant":true,"inputs":[{"name":"_name","type":"bytes32"}],"name":"register","outputs":[{"name":"","type":"address"}],"type":"function"},{"anonymous":false,"inputs":[{"indexed":true,"name":"name","type":"bytes32"}],"name":"Changed","type":"event"},{"anonymous":false,"inputs":[{"indexed":true,"name":"name","type":"bytes32"},{"indexed":true,"name":"addr","type":"address"}],"name":"PrimaryChanged","type":"event"}]).at(namereg_addr);
+      ownerusername = web3.toAscii(GlobalRegistrar.name(owner));
+      //ownerusername = web3.eth.contract([{ "constant": true, "inputs": [ { "name": "addr", "type": "address" } ], "name": "nameOf", "outputs": [ { "name": "name", "type": "string" } ], "type": "function" }]).at(namereg_addr).nameOf(owner);
+  } catch (e){ ownerusername = "\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000";  };
+  if(vviews1>0){
+    $('#vviews1').html(numberWithCommas(vviews1));
+    if(vviews1>thresh) {
+      $('#resultcontr').html('was');
+      $('#resultsuccess').html('all the sponsors funds was sent to the contract owner.');
+    }
+    else {
+      refundsponsors = '25%';
+      $('#resultsuccess').html('the sponsors have received a refund of <u>25%</u>, while all the rest was sent to the contract owner.');
+      $('#resultcontr').html("wasn't");
+    }
+    setTimeout(function(){
+    $('#end').show();
+    $('#end').addClass('animated fadeInUp');
+    }, 75 );
+    ended = true;
+  }
+  else {
+    setTimeout(function(){
+    $('#start').show();
+    $('#start').addClass('animated fadeInUp');
+  }, 75 );
+  }
+
+  var contractmethods = web3.eth.contract(abi).at(contractid);
+  var sponsors_deposits = [];
+  
+  for (var i = 0; i < i+1; i++) {
+    if(contractmethods.sponsorsList(i)=='0x') { break; } else {
+    sponsors_deposits.push(contractmethods.sponsorsList(i));
+    }
+  };
+
+  var OAR_addr = "0x1d11e5eae3112dbd44f99266872ff1d07c77dce8";
+  // TEST
+  //var OAR_addr = "0x20e12a1f859b3feae5fb2a0a32c18f5a65555bbf";
+  var OAR = web3.eth.contract([ { "constant": false, "inputs": [], "name": "getAddress", "outputs": [ { "name": "oaddr", "type": "address" } ], "type": "function" }]).at(OAR_addr).getAddress.call();
+  var oraclize = web3.eth.contract([{ "constant": true, "inputs": [], "name": "baseprice", "outputs": [ { "name": "", "type": "uint256" } ], "type": "function" }]).at(OAR);
+
+  var k = 0;
+  $.each( sponsors_deposits, function( key, value ) {
+    k++;
+    var usdpr = parseFloat((contractmethods.sponsors(value).toNumber()/(oraclize.baseprice().toNumber()*1000))).toFixed(2);
+
+    var ethpr = parseFloat((contractmethods.sponsors(value).toNumber()/1000000000000000000)).toFixed(2);
+    ethpr= (ethpr<=0) ? '< 0.01':'~ '+ethpr;
+    usdpr= (usdpr<=0) ? '< 0.01':'~ '+usdpr;
+    if(ended && refundsponsors=='25%'){
+      $('#columntitle').append('<th>Refund</th>')
+      $('#tab > tbody').append('<tr> <th scope="row">'+k+'</th> <td>'+value.replace('0x','')+'</td> <td title="'+ethpr+' ETHER">'+usdpr+' $</td> <td>'+refundsponsors+'</td> </tr>');
+    }
+    else {
+      $('#tab > tbody').append('<tr> <th scope="row">'+k+'</th> <td>'+value.replace('0x','')+'</td> <td title="'+ethpr+' ETHER">'+usdpr+' $</td> </tr>');
+    }
+  });
+
+  update_values(videoid,thresh,expiryd,vowner);
+}
+else {
+  alert('Please, connect to geth node before');
+}
+
+});
+
+
+function geth_req(){
+  gethip = $('#gethip').val();
+  $('#connected, #notconnected').hide();
+  if(gethip!='MIST BROWSER') {
+    web3 = new Web3(new Web3.providers.HttpProvider(gethip));
+  }
+  if(web3.isConnected()!=false){
+    web3sett = true;
+    $('#connected').show();
+  var available_accounts = web3.eth.accounts;
+
+  if(mistob==false) {
+  unlocked_accounts = ''; // []
+
+  $.each(available_accounts,function(index,val){
+  web3.eth.sendTransaction({from:val, to:val, value: 0, gas: 0, gasPrice: 0 },
+  function(err, res){
+  if(err=='Error: Gas price too low for acceptance'){
+      // unlocked
+      /*
+      var gastotneeded = gasamountsetvideo+gasamountdeploy;
+      if(web3.eth.getBalance(val).toNumber()>=gastotneeded){
+        unlocked_accounts.push(val);
+      }
+      */
+      unlocked_accounts = web3.eth.accounts[0];
+    }
+    });
+
+
+  });
+  }
+ 
+
+ setTimeout(function(){
+        
+  if(unlocked_accounts.length>0){
+    $('#deploynewc').removeAttr('disabled');
+    $('#deploynewc').removeAttr('title');
+  }
+  else {
+    if(mistob==false){
+      $('#deploynewc').attr('disabled','');
+      $('#deploynewc').attr('title','Please connect to your local unlocked node before');
+    }
+  }
+}, 200);
+  
+
+  }
+  else {
+    reset();
+    web3sett = false;
+    $('#notconnected').show(); 
+  }
+
+
+}
+
+function removeattrdismist(){
+    $('#deploynewc').removeAttr('disabled');
+    $('#deploynewc').removeAttr('title');
+}
+
+function onmouseoverdepldisabled(x){
+  if(x==1){
+      $('#arrowifdisabled').html('<img src="arrow.png" alt="arrow" style="margin-top:-50px;">');
+      $('#arrowifdisabled').addClass('animated fadeIn');
+  }
+  else {
+      //$('#arrowifdisabled').addClass('animated fadeOut');
+      $('#arrowifdisabled').html('');
+  }
+}
+
+function reset(){
+  $('#deploynewc').attr('disabled','');
+  $('#deploynewc').attr('title','Please connect to your local unlocked node before');
+  $('#vthres').html('');
+  $('#vexp').html('');
+  $('#vowner').html('');
+  $('#youtube_embed').html('');
+  $('#contriddep').val('');
+  $('#youtube_embed').removeClass('animated fadeIn');
+  $('#initiald').removeClass('animated FadeOut');
+  $('#loadingif').css('display','none');
+  ($('#columntitle').html().indexOf('<td>Refund</td>')>=0) ? $('#columntitle').html().replace('<td>Refund</td>',''):1+1;
+  $('#tab > tbody').html('');
+  $('#vthresinfo, #vthresinfo1').html('');
+  $('#expdateinfo, #expdateinfo1').html('');
+  $('#content').hide();
+  $('#initiald').show();
+}
+
+function numberWithCommas(x) {
+    return x.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+}
+
+function update_values(vid,thr,exp,vowner){
+  
+  //$('#vid').html('<a href="https://www.youtube.com/watch?v='+vid+'" target="_blank">'+vid+'</a>');
+  $('#vthres').html('<span style="font-size:1.4em;">'+numberWithCommas(thr)+'</span>'+' views');
+  $('#vthresinfo, #vthresinfo1').html(numberWithCommas(thr));
+  var date = new Date(exp*1000);
+  var hours = date.getHours();
+  var minutes = "0" + date.getMinutes();
+
+  var month = "0"+(date.getMonth()+1);
+  var day = date.getDate();
+  var year = "0"+date.getYear();
+
+  var formattedTime = hours + ':' + minutes.substr(-2) + ' ' + day +'/'+month+'/'+year.substr(-2);
+  var exp = formattedTime;
+
+  $('#vexp').html('<span style="font-size:1.4em;">'+numberWithCommas(exp)+'</span>');
+  $('#expdateinfo, #expdateinfo1').html(numberWithCommas(exp));
+  ownerusername = (ownerusername=="\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000") ? vowner.slice(0, -14)+'...' : ownerusername;
+  $('#vowner').html('<a href="https://live.ether.camp/account/'+vowner+'" target="_blank">'+ownerusername+'</a>');
+  $('#initiald').addClass('animated fadeOut');
+  $('#initiald').hide();
+  $('#youtube_embed').html('<iframe id="iframe" class="embed-responsive-item" width="830" height="400" frameborder="0" allowfullscreen></iframe>');
+  $('#iframe').attr('src','https://www.youtube-nocookie.com/embed/'+vid.trim());
+  var youtubefix = $('#iframe').attr('src').replace(/[^A-Za-z 0-9 \.,\?""!@#\$%\^&\*\(\)-_=\+;:<>\/\\\|\}\{\[\]`~]*/g, '');
+  $('#iframe').attr('src',youtubefix);
+  $('#contriddep').val(contractid);
+  $('#content').show();
+  $('#content > .col-md-3 > .panel').each(function(){
+  $(this).addClass('animated fadeIn');
+  });
+  if(!ended){
+    $('#modalenable').show();
+  }
+  $('#youtube_embed').addClass('animated fadeIn'); 
+}
+
+
+$(function() {
+    function reposition() {
+        var modal = $(this),
+            dialog = modal.find('.modal-dialog');
+        modal.css('display', 'block');
+        
+        // Dividing by two centers the modal exactly, but dividing by three 
+        // or four works better for larger screens.
+        dialog.css("margin-top", Math.max(0, ($(window).height() - dialog.height()) / 2));
+    }
+    // Reposition when a modal is shown
+    $('.modal').on('show.bs.modal', reposition);
+    // Reposition when the window is resized
+    $(window).on('resize', function() {
+        $('.modal:visible').each(reposition);
+    });
+});
+
+$('.number-spinner button').on('click', function () {    
+  var btn = $(this),
+    oldValue = btn.closest('.number-spinner').find('input').val().trim(),
+    newVal = 1;
+  
+  if (btn.attr('data-dir') == 'up') {
+    newVal = parseInt(oldValue) + 100;
+  } else {
+    if (oldValue > 100) {
+      newVal = parseInt(oldValue) - 100;
+    } else {
+      newVal = 100;
+    }
+  }
+  btn.closest('.number-spinner').find('input').val(newVal);
+});
+
+$('#submitnewcontract').on('click', function () {
+  
+var vthresh = $('#viewsthresholdnewc').val();
+var videoidnewc = $('#videoiddepnewc').val().trim();
+
+if(videoidnewc.length==11 && vthresh>=1){
+  
+  $('#newcontractinfo').html('<span style="font-size: 1.2em; color: #9E9E9E;" class="center" id="loadingcontractn"><img src="loadingnewc.gif" alt="loading new contract"/>Deploying your contract, please wait...</span>');
+  $('#newcontractinfo').addClass('animated fadeIn');
+  disableNewCForm();
+  deployNewContract(videoidnewc,vthresh);
+}
+else {
+  if(vthresh>=1){
+    alert('Video ID not valid or views threshold too low');
+  }
+  else {
+    alert('Views threshold too low');
+    $('#viewsthresholdnewc').val(1);
+  }
+}
+});
+
+function deployNewContract(videoid,threshold){
+//alert('un '+unlocked_accounts);
+//var contractsolidity = 'contract YoutubeViews{function YoutubeViews();function viewsCount()constant returns(uint256 );function forceCheck();function __callback(bytes32 myid,string result);function threshold()constant returns(uint256 );function expiryDate()constant returns(uint256 );function sponsorDeposit();function owner()constant returns(address );function setVideoID(string _videoID,uint256 _threshold);function videoID()constant returns(string );function sponsorsList(uint256 )constant returns(address );function sponsors(address )constant returns(uint256 );}';
+//var ccompiled = web3.eth.compile.solidity(contractsolidity);
+//var contractnew = web3.eth.contract(ccompiled.YoutubeViews.info.abiDefinition);
+
+var contractnew = web3.eth.contract(abi);
+
+var cbinary = '6060604052600080546004805433600160a060020a031991821617909155731d11e5eae3112dbd44f99266872ff1d07c77dce8918116821716179055600150610e778061004c6000396000f36060604052361561008d5760e060020a60003504631e7d6de2811461009857806323145ca0146100a157806327dc297e146100d357806342cde4e8146101e4578063516dde43146101ed578063788e26e7146101f65780638da5cb5b14610228578063aacf53281461023a578063acc00b80146102cd578063b4b5bc421461032b578063d35590c214610371575b61038961038b6101fa565b61038d60025481565b610389600454600160a060020a0390811633919091161415806100c95750600554610e100142105b156107eb57610002565b60408051602060248035600481810135601f81018590048502860185019096528585526103899581359591946044949293909201918190840183828082843750949650505050505050610725604080516000805460e060020a6338cc483102835292519092600160a060020a0316916338cc4831916004828101926020929190829003018187876161da5a03f11561000257505060408051805160018054600160a060020a031916909117908190557fc281d19e0000000000000000000000000000000000000000000000000000000082529151600160a060020a0392909216925063c281d19e916004828101926020929190829003018187876161da5a03f1156100025750506040515191505090565b61038d60065481565b61038d60055481565b6103895b346000148061021e5750600354600260001961010060018416150201909116046000145b156105d757610002565b61039f600454600160a060020a031681565b6040805160206004803580820135601f81018490048402850184019095528484526103899491936024939092918401919081908401838280828437505095549395505092359250600091600160a060020a039081163390911614159050806102b75750600354600260018216156101000260001901909116048114155b806102c3575082516000145b1561045d57610002565b6040805160038054602060026001831615610100026000190190921691909104601f81018290048202840182019094528383526103bc93908301828280156104555780601f1061042a57610100808354040283529160200191610455565b61039f60043560088054829081101561000257506000527ff3f7a9fe364faab93b216da50a3214154f22a0a2b415b23a84c8169e8b636ee30154600160a060020a031681565b61038d60043560076020526000908152604090205481565b005b565b60408051918252519081900360200190f35b60408051600160a060020a03929092168252519081900360200190f35b60405180806020018281038252838181518152602001915080519060200190808383829060006004602084601f0104600f02600301f150905090810190601f16801561041c5780820380516001836020036101000a031916815260200191505b509250505060405180910390f35b820191906000526020600020905b81548152906001019060200180831161043857829003601f168201915b505050505081565b8260036000509080519060200190828054600181600116156101000203166002900490600052602060002090601f016020900481019282601f106104c457805160ff19168380011785555b506104f49291505b808211156105ce57600081556001016104b0565b828001600101855582156104a8579182015b828111156104a85782518260005055916020019190600101906104d6565b50505062093a804201600581905560068290556105d2815b6040805160208181018352600082528251606081018452602581527f68746d6c2868747470733a2f2f7777772e796f75747562652e636f6d2f776174818301527f63683f763d0000000000000000000000000000000000000000000000000000008185015283516003805460026001821615610100026000190190911604601f810185900485028301850190965285825293946108279492939192918301828280156109d85780601f106109ad576101008083540402835291602001916109d8565b5090565b505050565b600160a060020a033316600090815260076020526040812054141561065357600880546001810180835533929190829082801582901161062a5781836000526020600020918201910161062a91906104b0565b50505081548110156100025760009182526020909120018054600160a060020a03191690911790555b600160a060020a033316600090815260076020526040902080543401905560055442108015906106865750600254600090115b1561038b5761038b61069a565b6002556107e75b60025460065460009182919010156107fd575b6008548110156107fd57600880548290811015610002577ff3f7a9fe364faab93b216da50a3214154f22a0a2b415b23a84c8169e8b636ee30154600160a060020a0316600081815260076020526040808220549051929550859350909160049091049082818181858883f150505050506001016106ad565b600160a060020a031633600160a060020a031614151561074457610002565b6106938160006107f78260006040805160208101909152600090819052828180805b83518110156107dc57603060f860020a02848281518110156100025790602001015160f860020a900460f860020a02101580156107c75750603960f860020a02848281518110156100025790602001015160f860020a900460f860020a0211155b15610c91578115610ce8578560001415610cdf575b509095945050505050565b5050565b60055461038b9061050c565b92915050565b604051600454600160a060020a03908116916000913016319082818181858883f150505050505050565b604080518082018252600381527f55524c000000000000000000000000000000000000000000000000000000000060208281019190915260008054845160e060020a6338cc483102815294519596506105d295889588948493600160a060020a0316926338cc4831926004818101939291829003018187876161da5a03f115610002575050604051805160018054600160a060020a031916909117908190557f524f388900000000000000000000000000000000000000000000000000000000825260206004838101828152895160248601528951600160a060020a0394909416955063524f3889948a94919384936044929092019286820192909182918591839186918e9190601f850104600f02600301f150905090810190601f1680156109645780820380516001836020036101000a031916815260200191505b50925050506020604051808303816000876161da5a03f11561000257505060405151915050670de0b6b3a764000062030d403a0201811115610b6457600091505b509392505050565b820191906000526020600020905b8154815290600101906020018083116109bb57829003601f168201915b5050505050606060405190810160405280603981526020017f292e7870617468282f2f2a5b636f6e7461696e732840636c6173732c2022776181526020017f7463682d766965772d636f756e7422295d2f74657874282929000000000000008152602001506040805160208181018352600080835283518083018552818152845192830190945281529091610c89918691869186919060408051602081810183526000808352835180830185528190528351808301855281905283518083018552819052835180830185528190528351808301855281905283518083018552818152845192830185528183528551875189518b518d51985197988e988e988e988e988e989097929691958695019091019091010190805910610af75750595b9080825280602002602001820160405250935083925060009150600090505b8851811015610d1c57888181518110156100025790602001015160f860020a900460f860020a028383806001019450815181101561000257906020010190908160001a905350600101610b16565b600160009054906101000a9004600160a060020a0316600160a060020a031663adf59f99828787876040518560e060020a0281526004018084815260200180602001806020018381038352858181518152602001915080519060200190808383829060006004602084601f0104600f02600301f150905090810190601f168015610c025780820380516001836020036101000a031916815260200191505b508381038252848181518152602001915080519060200190808383829060006004602084601f0104600f02600301f150905090810190601f168015610c5b5780820380516001836020036101000a031916815260200191505b509550505050505060206040518083038185886185025a03f1156100025750506040515193506109a5915050565b949350505050565b8381815181101561000257016020015160f860020a90819004027f2e000000000000000000000000000000000000000000000000000000000000001415610cd757600191505b600101610766565b60001995909501945b600a83029250825060308482815181101561000257016020015160f860020a90819004810204909301602f19019250610cd7565b5060005b8751811015610d6e57878181518110156100025790602001015160f860020a900460f860020a028383806001019450815181101561000257906020010190908160001a905350600101610d20565b5060005b8651811015610dc057868181518110156100025790602001015160f860020a900460f860020a028383806001019450815181101561000257906020010190908160001a905350600101610d72565b5060005b8551811015610e1257858181518110156100025790602001015160f860020a900460f860020a028383806001019450815181101561000257906020010190908160001a905350600101610dc4565b5060005b8451811015610e6457848181518110156100025790602001015160f860020a900460f860020a028383806001019450815181101561000257906020010190908160001a905350600101610e16565b50909d9c5050505050505050505050505056';
+
+var newcontract = contractnew.new('Empty',{from: unlocked_accounts, data: cbinary, gas: gasamountdeploy}, function(e, contract){
+    if(!e) {
+      if(!contract.address) {
+        //console.log("Contract transaction send: TransactionHash: " + contract.transactionHash + " waiting to be mined...");
+      } else {
+        //console.log("Contract mined! Address: " + contract.address);
+        //console.log(contract);
+        var contractnewaddress = contract.address;
+        
+          $('#loadingcontractn').html('<img src="loadingnewc.gif" alt="loading new contract"/>Contract deployed');
+          $('#newcontractinfo').addClass('animated pulse');
+          setTimeout(function(){
+          var callallm = web3.eth.contract(abi).at(contractnewaddress).setVideoID(videoid,threshold,{from: unlocked_accounts, value: 0, gas: gasamountsetvideo});
+          setTimeout(function(){
+          $('#newcontractinfo').html('<span style="font-size: 1.2em;" class="center" id="loadingcontractn">Contract deployed:<br> <a href="http://dapps.oraclize.it/youtube-escrow/#'+contractnewaddress+'" onclick="window.setTimeout(function(){ location.reload(); },80);">'+contractnewaddress+'</a></span>');
+          
+          resetNewCForm();
+          }, 5000);
+          }, 5000);
+        
+      }
+
+    }
+})
+}
+
+function disableNewCForm(){
+  $('#viewsthresholdnewc').attr('disabled','');
+  $('#videoiddepnewc').attr('disabled','');
+  $('#closedep').attr('disabled','');
+  $('#submitnewcontract').attr('disabled','');
+  $('#dismissnewc').attr('disabled','');
+  $('#up').attr('disabled','');
+  $('#dwn').attr('disabled','');
+  $('#depnewcontr').attr('data-backdrop','static');
+  $('#depnewcontr').attr('data-keyboard','false');
+}
+
+function resetNewCForm(){
+  $('#viewsthresholdnewc').removeAttr('disabled');
+  $('#videoiddepnewc').removeAttr('disabled');
+  $('#closedep').removeAttr('disabled');
+  $('#submitnewcontract').removeAttr('disabled');
+  $('#dismissnewc').removeAttr('disabled');
+  $('#up').removeAttr('disabled');
+  $('#dwn').removeAttr('disabled');
+  $('#depnewcontr').removeAttr('data-backdrop');
+  $('#depnewcontr').removeAttr('data-keyboard');
+}
+
+</script>
+
+<script>
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+  ga('create', 'UA-59380873-1', 'auto');
+  ga('send', 'pageview');
+
+</script>
+
+</body>
+</html>
