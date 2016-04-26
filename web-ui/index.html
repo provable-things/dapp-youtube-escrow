@@ -174,7 +174,7 @@ Use this smart contract to sponsor youtubers,<br> pay only for the successful on
          <div class="form-inline">
           <div class="form-group">
               <label for="gethip" class="control-label">Connect to geth:</label>
-              <input type="text" class="form-control" id="gethip" style="width:200px;margin: 0 5px 0 5px;" value="http://178.62.29.206:8081">
+              <input type="text" class="form-control" id="gethip" style="width:200px;margin: 0 5px 0 5px;" value="http://eth-node-1.oraclize.it">
               <!--<input type="text" class="form-control" id="gethip" style="width:200px;margin: 0 5px 0 5px;" value="http://localhost:8545">-->
               <span class="btn btn-default" id="submitgethip">CONNECT</span>
           </div>
@@ -305,9 +305,9 @@ Use this smart contract to sponsor youtubers,<br> pay only for the successful on
 <script type="text/javascript">
 
 var node_list = {
-  'Mainnet' : 'http://178.62.29.206:8081/',
-  'Morden' : 'http://178.62.29.206:8082/',
-  'Testnet161' : 'http://178.62.29.206:8083/',  
+  'Mainnet' : 'http://eth-node-1.oraclize.it/',
+  'Morden' : 'http://eth-testnet-node-1.oraclize.it/',
+  'Testnet161' : 'http://eth-testnet161-node-1.oraclize.it/',  
 };
 
 var abi = [ { "constant": true, "inputs": [], "name": "viewsCount", "outputs": [ { "name": "", "type": "uint256" } ], "type": "function" }, { "constant": false, "inputs": [], "name": "forceCheck", "outputs": [], "type": "function" }, { "constant": false, "inputs": [ { "name": "myid", "type": "bytes32" }, { "name": "result", "type": "string" } ], "name": "__callback", "outputs": [], "type": "function" }, { "constant": true, "inputs": [], "name": "threshold", "outputs": [ { "name": "", "type": "uint256" } ], "type": "function" }, { "constant": true, "inputs": [], "name": "expiryDate", "outputs": [ { "name": "", "type": "uint256" } ], "type": "function" }, { "constant": false, "inputs": [], "name": "sponsorDeposit", "outputs": [], "type": "function" }, { "constant": true, "inputs": [], "name": "owner", "outputs": [ { "name": "", "type": "address" } ], "type": "function" }, { "constant": false, "inputs": [ { "name": "_videoID", "type": "string" }, { "name": "_threshold", "type": "uint256" } ], "name": "setVideoID", "outputs": [], "type": "function" }, { "constant": true, "inputs": [], "name": "videoID", "outputs": [ { "name": "", "type": "string" } ], "type": "function" }, { "constant": true, "inputs": [ { "name": "", "type": "uint256" } ], "name": "sponsorsList", "outputs": [ { "name": "", "type": "address" } ], "type": "function" }, { "constant": true, "inputs": [ { "name": "", "type": "address" } ], "name": "sponsors", "outputs": [ { "name": "", "type": "uint256" } ], "type": "function" }, { "inputs": [], "type": "constructor" } ];
